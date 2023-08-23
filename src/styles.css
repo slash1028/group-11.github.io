@@ -1,0 +1,92 @@
+body {
+  font-family: sans-serif;
+}
+
+.head {
+  height: 130mm;
+  width: auto;
+  text-align: center;
+}
+.headline {
+  font-size: 20mm;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: rgb(0, 47, 108);
+}
+.paragraph {
+  font-size: 5mm;
+}
+.image {
+  margin-top: 15mm;
+  height: 85mm;
+  text-align: center;
+}
+.space {
+  height: 15mm;
+}
+.space_big {
+  height: 80mm;
+}
+.space_small {
+  height: 5mm;
+}
+.edge {
+  display: flex;
+  margin: auto;
+  height: 0.3mm;
+  width: 300mm;
+  background-color: rgb(167, 167, 167);
+}
+.select {
+  height: 200mm;
+  text-align: center;
+}
+.entrance {
+  margin-top: 8mm;
+  height: 15mm;
+  width: 100mm;
+  font-size: 5mm;
+  border-radius: 5mm;
+  border-color: rgb(0, 47, 108);
+  background-color: white;
+  color: rgb(0, 47, 108);
+}
+button:hover {
+  background-color: rgb(0, 47, 108);
+  color: white;
+}
+.head_2 {
+  font-size: 15mm;
+  text-align: center;
+  color: rgb(0, 47, 108);
+}
+.main {
+  margin-top: -5mm;
+  text-align: center;
+}
+.choose {
+  margin-top: 5mm;
+  height: 10mm;
+  width: 60mm;
+  font-size: 5mm;
+  border-radius: 5mm;
+  background-color: white;
+  color: rgb(0, 47, 108);
+  border-color: rgb(0, 47, 108);
+}
+.choose:focus {
+  background-color: rgb(0, 47, 108);
+  color: white;
+}
+.end {
+  text-align: center;
+}
+.choose_end {
+  margin-top: 5mm;
+  height: 10mm;
+  width: 100mm;
+  font-size: 5mm;
+  border-radius: 5mm;
+  background-color: white;
+  color: rgb(0, 47, 108);
+  border-color: rgb(0, 47, 108);
+}

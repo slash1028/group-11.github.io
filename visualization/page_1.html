@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Researcher's mobility in Finland</title>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="upgrade-insecure-requests"
+    />
+    <link rel="stylesheet" type="text/css" href="../src/styles.css" />
+    <script src="http://d3js.org/d3.v6.min.js" charset="utf-8"></script>
+  </head>
+
+  <body>
+    <div class="head_2">
+      <p>Researcher's mobility in location</p>
+    </div>
+    <div class="main">
+      <svg
+        display:block;
+        margin:auto;
+        width="1100"
+        height="600"
+        id="mainsvg"
+        class="svg1"
+        style="display: block; margin: 0 auto;"
+      ></svg>
+      <script>
+        //读取点数
+        let NODENUM = 1;
+        d3.csv("../data/region_name.csv").then((nodes) => {
+          NODENUM = nodes.length;
+          d3.csv("../data/Author_Mobility_Network(08-18).csv").then((links) => {
+            links = links.filter((link) => link.From !== link.To);
+            //添加索引和始末
+            for (let link of links) {
+              link.source = nodes.find((node) => node.id === link.From);
+              link.target = nodes.find((node) => node.id === link.To);
+            }
+            for (let i = 0; i < nodes.length; i++) {
+              nodes[i].ord = i;
+            }
+            const rectwidth = 20;
+            const svg = d3.select(".svg1");
+            const width = svg.attr("width");
+            const height = svg.attr("height");
+            const cx = (d) => 110 + d.ord * rectwidth + 40;
+            const cy = (d) => 100;
+            const cx1 = (d) => 120;
+            const cy1 = (d) => 120 + d.ord * rectwidth;
+            svg
+              .selectAll(".myText1")
+              .data(nodes)
+              .join("text")
+              .attr("class", "text")
+              .attr("y", cy)
+              .attr("x", cx)
+              .attr("dy", 10)
+              .attr("text-anchor", "end")
+              .attr("writing-mode", "vertical-rl")
+              .text((d) => d.name);
+            svg
+              .selectAll(".myText2")
+              .data(nodes)
+              .join("text")
+              .attr("class", "text")
+              .attr("y", cy1)
+              .attr("x", cx1)
+              .attr("dy", 10)
+              .attr("text-anchor", "end")
+              .attr("writing-mode", "horizontal-tb")
+              .text((d) => d.name);
+            const cx2 = (d) => 100 + d.ord * rectwidth + 40;
+            const cy2 = (d) => 110 + d.ord * rectwidth + 5;
+            const colorScale = d3
+              .scaleThreshold()
+              .domain([101, 501, 1001, 2001, 5001, 10001, 20001, 3300001])
+              .range([
+                "rgb(173, 216, 230)", // 淡蓝色
+                "rgb(135, 206, 250)", // 天蓝色
+                "rgb(0, 191, 255)", // 深天蓝色
+                "rgb(30,144,255)",
+                "rgb(0,0,255)", // 蓝色
+                "rgb(186, 85, 211)", // 深蓝色
+                "rgb(148, 0, 211)", // 靛紫色
+                "rgb(75, 0, 130)" // 紫罗兰色
+              ]);
+            svg
+              .selectAll("rect")
+              .data(links)
+              .join("rect")
+              .attr("x", (d) => cx2(d.source))
+              .attr("y", (d) => cy2(d.target))
+              .attr("width", 18)
+              .attr("height", 18)
+              .attr("fill", (d) => colorScale(parseInt(d.Times)))
+              .on("mouseover", function (event, d) {
+                svg
+                  .append("rect")
+                  .attr("class", "tooltip")
+                  .attr("x", cx2(d.source) - 10)
+                  .attr("y", cy2(d.target) - 20)
+                  .attr("rx", "5")
+                  .attr("ry", "5")
+                  .attr("width", 80)
+                  .attr("height", 30)
+                  .attr("fill", "rgba(111, 127, 148, 0.8)");
+
+                svg
+                  .append("text")
+                  .attr("class", "tooltip")
+                  .attr("x", cx2(d.source))
+                  .attr("y", cy2(d.target))
+                  .text(`${d.Times}`)
+                  .attr("font-size", "15px")
+                  .attr("fill", "white");
+              })
+              .on("mouseout", function () {
+                svg.selectAll(".tooltip").remove();
+              });
+
+            //添加图注
+            svg
+              .selectAll(".myText3")
+              .data(nodes)
+              .join("text")
+              .attr("class", "text")
+              .attr("y", 200)
+              .attr("x", 650)
+              .text("Data on the transform of scientists between cities");
+
+            svg
+              .selectAll(".myText4")
+              .data(nodes)
+              .join("text")
+              .attr("class", "text")
+              .attr("y", 240)
+              .attr("x", 650)
+              .text("xlim : source city | ylim : target city");
+            const colorValues = [
+              100,
+              500,
+              1000,
+              2000,
+              5000,
+              10000,
+              20000,
+              20001
+            ];
+            const temp = [0, 100, 500, 1000, 2000, 5000, 10000, 20000, "+inf"];
+            svg
+              .selectAll("temp")
+              .data(colorValues)
+              .join("circle")
+              .attr("r", 5)
+              .attr("fill", (d) => colorScale(d))
+              .attr("cx", 700)
+              .attr("cy", (d, i) => 280 + i * 25);
+            svg
+              .selectAll(".myText5")
+              .data(colorValues)
+              .join("text")
+              .attr("class", "text")
+              .attr("x", 750)
+              .attr("y", (d, i) => 285 + i * 25)
+              .text((d, i) => `${temp[i]} - ${temp[i + 1]}`);
+          });
+        });
+      </script>
+      <div class="paragraph">
+        <p>
+          Above is the visualization of data collected from 2008 to 2018,
+          showing the transform of scientists between cities.
+        </p>
+        <p>
+          The data divides Finland into 22 regions, and the number of scientists
+          transformed can be seen from this chart.
+        </p>
+      </div>
+      <div class="main">
+        <div class="space"></div>
+        <div class="edge"></div>
+        <div class="space"></div>
+        <div class="paragraph">
+          <p>
+            You can also select a period of time to see the transform of
+            scientists between cities.
+          </p>
+        </div>
+        <div class="space_small"></div>
+      </div>
+
+      <button class="choose" id="btn09-13">2009 - 2013</button>
+      <button class="choose" id="btn14-18">2014 - 2018</button>
+      <svg
+        display:block;
+        margin:auto;
+        width="1100"
+        height="600"
+        id="svg_2"
+        class="svg2"
+        style="display: block; margin: 0 auto;"
+      ></svg>
+      <script></script>
+    </div>
+    <div class="main">
+      <div class="space"></div>
+      <div class="edge"></div>
+      <div class="space"></div>
+      <div class="paragraph">
+        <p>
+          Here are two charts that shows the total amount of flow-in and
+          flow-out scientists in different cities:
+        </p>
+      </div>
+      <svg
+        width="1100"
+        height="1000"
+        id="svg_3"
+        class="svg3"
+        style="display: block; margin: 0 auto;"
+      ></svg>
+      <script>
+        d3.csv("../data/Author_Mobility_Network(08-18).csv", d3.autoType).then(
+          (data) => {
+            const cityOutflows = {};
+            const cityInflows = {};
+
+            data.forEach((d) => {
+              const fromCity = d.From;
+              const toCity = d.To;
+              const outflow = +d.Times;
+
+              if (fromCity !== toCity) {
+                if (cityOutflows.hasOwnProperty(fromCity)) {
+                  cityOutflows[fromCity] += outflow;
+                } else {
+                  cityOutflows[fromCity] = outflow;
+                }
+                if (cityInflows.hasOwnProperty(toCity)) {
+                  cityInflows[toCity] += outflow;
+                } else {
+                  cityInflows[toCity] = outflow;
+                }
+              }
+            });
+            const main = Object.keys(cityOutflows).map((city) => ({
+              city: city,
+              times: cityOutflows[city],
+              times1: cityInflows[city] || 0
+            }));
+
+            main.sort((a, b) => b.times - a.times);
+            console.table(main);
+            const svg = d3.select(".svg3");
+            const width = +svg.attr("width");
+            const height = +svg.attr("height");
+            const gap = 40;
+            const cx = 500;
+            const cy = (d, i) => 100 + i * gap;
+            const lineGenerator = d3
+              .line()
+              .x((d) => d.x)
+              .y((d) => d.y);
+            //标签
+            svg
+              .selectAll(".myText2")
+              .data(main)
+              .join("text")
+              .attr("class", "text")
+              .attr("y", (d, i) => cy(d, i) - 10)
+              .attr("x", 550)
+              .attr("text-anchor", "end")
+              .attr("text-anchor", "middle")
+              .attr("writing-mode", "horizontal-tb")
+              .text((d) => d.city);
+            text = ["流出量", "城市名", "流入量"];
+            svg
+              .selectAll(".label")
+              .data(text)
+              .enter()
+              .append("text")
+              .attr("class", "label")
+              .attr("x", (d, i) => 405 + i * 120)
+              .attr("y", 50)
+              .attr("text-anchor", "start")
+              .attr("writing-mode", "horizontal-tb")
+              .text((d) => d);
+            //svg.selectAll('.myLine').data(main).join('path')
+            //  .attr('class', 'line')
+            //  .attr('d', (d, i) => lineGenerator([
+            //    { x: 500, y: cy(d, i)+gap/2 },
+            //    { x: 1000, y: cy(d, i)+gap/2 }
+            //  ]))
+            // .style('stroke', 'gray').style('stroke-width', 0.5);
+            //流出流入量
+            svg
+              .selectAll(".myText2")
+              .data(main)
+              .join("text")
+              .attr("class", "text")
+              .attr("y", (d, i) => cy(d, i) - 10)
+              .attr("x", 455)
+              .attr("text-anchor", "end")
+              .attr("writing-mode", "horizontal-tb")
+              .text((d) => d.times);
+            svg
+              .selectAll(".myText2")
+              .data(main)
+              .join("text")
+              .attr("class", "text")
+              .attr("y", (d, i) => cy(d, i) - 10)
+              .attr("x", 645)
+              .attr("text-anchor", "start")
+              .attr("writing-mode", "horizontal-tb")
+              .text((d) => d.times1);
+            //创建坐标轴
+            //坐标轴
+            const xScale = d3
+              .scaleLinear()
+              .domain([0, 1000, 10000, 50000, 150000, 1000000, 2000000])
+              .range([0, 50, 100, 150, 200, 250, 300]);
+            const xScale1 = d3
+              .scaleLinear()
+              .domain([2000000, 1000000, 150000, 50000, 10000, 1000, 0])
+              .range([0, 50, 100, 150, 200, 250, 300]);
+            const xAxis1 = d3
+              .axisTop(xScale1)
+              .tickValues([0, 1000, 10000, 50000, 150000, 1000000, 2000000]);
+            const xAxis = d3
+              .axisTop(xScale)
+              .tickValues([0, 1000, 10000, 50000, 150000, 1000000, 2000000]);
+            svg
+              .append("g")
+              .attr("class", "x-axis")
+              .attr("transform", `translate(10, 50)`)
+              .call(xAxis);
+            svg
+              .append("g")
+              .attr("class", "x-axis")
+              .attr("transform", `translate(750, 50)`)
+              .call(xAxis1);
+            const cityNames = main.map((d) => d.city);
+            const yScale = d3
+              .scaleBand()
+              .domain(cityNames)
+              .range([0, 22 * gap])
+              .padding(0.2);
+            const yAxis = d3.axisLeft(yScale).tickFormat("");
+            svg
+              .append("g")
+              .attr("class", "y-axis")
+              .attr("transform", `translate(10, 50)`)
+              .call(yAxis);
+            svg
+              .append("g")
+              .attr("class", "y-axis")
+              .attr("transform", `translate(1050, 50)`)
+              .call(yAxis);
+            svg
+              .selectAll(".rect")
+              .data(main)
+              .join("rect")
+              .attr("x", 10)
+              .attr("y", (d, i) => 80 + yScale(d.city) - yScale.bandwidth() / 2)
+              .attr("width", (d) => xScale(d.times))
+              .attr("height", 20)
+              .style("fill", (d) => {
+                if (d.times < 1000) {
+                  return "#fee0d2";
+                } else if (d.times < 10000) {
+                  return "#A1DAB4";
+                } else if (d.times < 50000) {
+                  return "#41B6C4";
+                } else if (d.times < 150000) {
+                  return "#2C7FB8";
+                } else if (d.times < 1000000) {
+                  return "#253494";
+                } else if (d.times < 2000000) {
+                  return "#E34A33";
+                } else {
+                  return "#253494";
+                }
+              });
+            svg
+              .selectAll(".rect")
+              .data(main)
+              .join("rect")
+              .attr("x", (d) => 1050 - xScale(d.times1))
+              .attr("y", (d, i) => 80 + yScale(d.city) - yScale.bandwidth() / 2)
+              .attr("width", (d) => xScale(d.times1))
+              .attr("height", 20)
+              .style("fill", (d) => {
+                if (d.times1 < 1000) {
+                  return "#fee0d2";
+                } else if (d.times1 < 10000) {
+                  return "#A1DAB4";
+                } else if (d.times1 < 50000) {
+                  return "#41B6C4";
+                } else if (d.times1 < 150000) {
+                  return "#2C7FB8";
+                } else if (d.times1 < 1000000) {
+                  return "#253494";
+                } else if (d.times1 < 2000000) {
+                  return "#E34A33";
+                } else {
+                  return "#253494";
+                }
+              });
+          }
+        );
+      </script>
+    </div>
+    <div class="end">
+      <div class="space"></div>
+      <div class="edge"></div>
+      <div class="space"></div>
+      <div class="paragraph">
+        <p>
+          Thank you for reading this.
+        </p>
+        <p>Now you can choose which page to go next:</p>
+      </div>
+      <div>
+        <button
+          class="choose_end"
+          id="homepage"
+          onclick="location='../index.html'"
+        >
+          Return to Homepage
+        </button>
+      </div>
+      <div>
+        <button class="choose_end" id="page_2" onclick="location='page_2.html'">
+          Mobility in Disciplinary Focus
+        </button>
+      </div>
+      <div class="space"></div>
+    </div>
+  </body>
+</html>
